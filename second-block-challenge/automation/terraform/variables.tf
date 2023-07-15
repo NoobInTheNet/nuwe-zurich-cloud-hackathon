@@ -10,11 +10,12 @@ variable "region" {
 variable "stack_name" {
   description = "The custom name of the infrastructure stack to be deployed."
   type        = string
-  default     = "nuwe-zurich-cloud-hackathon-2"
+  default     = "zurich-cloud-hackathon"
 }
 
 variable "deployment_environment" {
   description = "The environment where the resources will be deployed to."
   type        = string
+  default     = "dev"
 }
 #--------[Resources's Variables]--------#

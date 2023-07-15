@@ -1,18 +1,28 @@
-import boto3
 import os
+import boto3
 
-s3 = boto3.client('s3')
+s3 = boto3.client("s3")
+
 
 def lambda_handler(event, context):
-    # Retrieve the uploaded file data
-    file_data = event['body']
-    file_name = event['filename']
-    bucket_name = os.environ['BUCKET_NAME']
-    
-    # Upload the file to S3
-    s3.upload_fileobj(file_data, bucket_name, file_name)
-    
-    return {
-        'statusCode': 200,
-        'body': 'File uploaded successfully'
-    }
+    # Retrieve the uploaded image from the event
+    image_data = event["body"]
+
+    # Generate a unique filename for the image
+    image_filename = f"image_{context.aws_request_id}.jpg"
+
+    try:
+        # Save the image to the S3 bucket
+        s3.put_object(
+            Body=image_data,
+            Bucket=os.environ["BucketName"],
+            Key=image_filename,
+        )
+
+        # Return a success response
+        response = {"statusCode": 200, "body": "Image uploaded successfully"}
+    except Exception as e:
+        # Return an error response
+        response = {"statusCode": 500, "body": f"Error uploading image: {str(e)}"}
+
+    return response

@@ -1,23 +1,20 @@
-module "s3" {
-  source       = "./modules/s3"
-  environment  = var.deployment_environment
-  api_endpoint = module.api_gateway.api_endpoint
-  bucket_name  = "${var.stack_name}-s3-bucket"
+module "s3_bucket" {
+  source = "./modules/s3"
+
+  stack_name   = var.stack_name
+  api_endpoint = module.api_gateway.invoke_url
 }
 
-module "cloudfront" {
-  source       = "./modules/cloudfront"
-  s3_bucket_id = module.s3.bucket_id
-}
+module "lambda_function" {
+  source = "./modules/lambda"
 
-module "lambda_edge" {
-  source        = "./modules/lambda_edge"
-  function_name = "${var.stack_name}-lambda"
-  s3_bucket_id  = module.s3.bucket_id
+  stack_name = var.stack_name
 }
 
 module "api_gateway" {
-  source            = "./modules/api_gateway"
-  api_name          = "${var.stack_name}-api"
-  lambda_invoke_arn = module.lambda_edge.function_invoke_arn
+  source = "./modules/api_gateway"
+
+  stack_name                 = var.stack_name
+  lambda_function_invoke_arn = module.lambda_function.invoke_arn
+  lambda_function_name       = module.lambda_function.name
 }

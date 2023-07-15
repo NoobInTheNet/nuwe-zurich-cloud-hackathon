@@ -1,14 +1,7 @@
-variable "bucket_name" {
-  description = "S3 bucket's name."
-  type = string
-}
-
-variable "environment" {
-  description = "S3 bucket's deployment environment."
+variable "stack_name" {
   type = string
 }
 
 variable "api_endpoint" {
-  description = "API Gateway's endpoint to reach for the image upload."
   type = string
 }

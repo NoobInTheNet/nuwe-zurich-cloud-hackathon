@@ -1,66 +1,46 @@
-# Create the S3 bucket
 resource "aws_s3_bucket" "bucket" {
-  bucket = var.bucket_name
+  bucket = "${var.stack_name}-s3-bucket"
 
   tags = {
-    Name        = var.bucket_name
-    Environment = var.environment
+    Name = "${var.stack_name}-s3-bucket"
   }
 }
 
-# Define a bucket policy to allow public read access to objects
-resource "aws_s3_bucket_policy" "bucket_policy" {
+resource "aws_s3_bucket_website_configuration" "bucket" {
   bucket = aws_s3_bucket.bucket.id
 
-  policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "PublicReadGetObject",
-      "Effect": "Allow",
-      "Principal": "*",
-      "Action": "s3:GetObject",
-      "Resource": "arn:aws:s3:::${aws_s3_bucket.bucket.id}/*"
-    }
-  ]
-}
-EOF
-}
-
-# Set the ACL (Access Control List) for the S3 bucket
-resource "aws_s3_bucket_acl" "bucket_acl" {
-  bucket = aws_s3_bucket.bucket.id
-
-  owner {
-    id           = aws_s3_bucket.bucket.owner_id
-    display_name = aws_s3_bucket.bucket.owner_display_name
+  index_document {
+    suffix = "index.html"
   }
-
-  grants = [
-    {
-      id           = "CanonicalUser:${aws_s3_bucket.bucket.owner_id}"
-      permission   = "FULL_CONTROL"
-      type         = "CanonicalUser"
-      display_name = aws_s3_bucket.bucket.owner_display_name
-    }
-  ]
 }
 
-# Render the index.html template file with the API endpoint
-data "template_file" "index_html" {
-  template = file("${path.module}/../../../../app/frontend/index.html.tmplt")
+resource "aws_s3_bucket_ownership_controls" "bucket" {
+  depends_on = [aws_s3_bucket.bucket]
+  bucket     = aws_s3_bucket.bucket.id
 
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
+resource "aws_s3_bucket_acl" "bucket" {
+  depends_on = [aws_s3_bucket_ownership_controls.bucket]
+  bucket     = aws_s3_bucket.bucket.arn
+  acl        = "private"
+}
+
+data "template_file" "webapp_index_template" {
+  template = file("${path.module}/../../../../app/frontend/index.html.tpl")
   vars = {
     API_ENDPOINT = var.api_endpoint
   }
 }
 
-# Upload the rendered index.html file to the S3 bucket
-resource "aws_s3_object" "index_html" {
-  bucket       = aws_s3_bucket.bucket.id
-  key          = "index.html"
-  content_type = "text/html"
-  content      = data.template_file.index_html.rendered
-  acl          = "public-read"
+resource "aws_s3_object" "webapp_index" {
+  bucket = aws_s3_bucket.bucket.id
+  acl    = "public-read"
+  key    = "index.html"
+  source = data.template_file.webapp_index_template.rendered
+
+  etag = md5(data.template_file.webapp_index_template.rendered)
 }
