@@ -1,8 +1,13 @@
 pipeline {
     agent any
 
+    environment {
+        // Assuming 'aws-credentials-id' is the ID of your AWS credentials in Jenkins
+        AWS_CREDENTIALS = credentials('73c95420-827e-4657-8f1c-9e1be0c779d1')
+    }
+
     stages {
-        stage('Checkout') {
+        stage('Initialize') {
             steps {
                 // Check out the source code from the Gogs repository
                 checkout scm
@@ -48,10 +53,7 @@ pipeline {
             }
         }
 
-        stage('Destroy') {
-            when {
-                expression { currentBuild.rawBuild.getCause(hudson.model.Cause$UserIdCause) != null }
-            }
+        stage('Optional Destroy') {
             steps {
                 dir('automation/terraform') {
                     // Change the working directory to 'automation/terraform'
