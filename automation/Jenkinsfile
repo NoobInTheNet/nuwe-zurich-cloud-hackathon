@@ -6,26 +6,33 @@ pipeline {
             steps {
                 // Check out the source code from the Gogs repository
                 checkout scm
+                dir('automation/terraform') {
+                    // Change the working directory to 'automation/terraform'
+                    sh 'terraform init'
+                }
             }
         }
 
         stage('Validate') {
             steps {
-                // Initialize Terraform and validate the configuration
-                sh 'terraform init'
-                sh 'terraform validate'
+                dir('automation/terraform') {
+                    // Change the working directory to 'automation/terraform'
+                    sh 'terraform validate'
+                }
             }
         }
 
         stage('Plan') {
             steps {
-                // Create a Terraform plan and check if there are any changes
-                script {
-                    def planOutput = sh(returnStdout: true, script: 'terraform plan -detailed-exitcode -out=tfplan')
-                    if (planOutput.contains('No changes')) {
-                        error('No infrastructure changes detected. Skipping deployment.')
-                    } else if (planOutput.contains('Error:')) {
-                        error('Terraform plan validation failed. Please fix the configuration.')
+                dir('automation/terraform') {
+                    // Change the working directory to 'automation/terraform'
+                    script {
+                        def planOutput = sh(returnStdout: true, script: 'terraform plan -detailed-exitcode -out=tfplan')
+                        if (planOutput.contains('No changes')) {
+                            error('No infrastructure changes detected. Skipping deployment.')
+                        } else if (planOutput.contains('Error:')) {
+                            error('Terraform plan validation failed. Please fix the configuration.')
+                        }
                     }
                 }
             }
@@ -33,40 +40,38 @@ pipeline {
 
         stage('Apply') {
             steps {
-                // Prompt for user confirmation before proceeding with the deployment
-                input message: 'Proceed with deployment? ("Proceed" to continue or "Abort" to cancel)', ok: 'Proceed'
-                // Apply the Terraform plan
-                sh 'terraform apply -auto-approve tfplan'
+                dir('automation/terraform') {
+                    // Change the working directory to 'automation/terraform'
+                    input message: 'Proceed with deployment? ("Proceed" to continue or "Abort" to cancel)', ok: 'Proceed'
+                    sh 'terraform apply -auto-approve tfplan'
+                }
             }
         }
 
         stage('Destroy') {
             when {
-                // Run the destroy stage only when manually triggered by the user
                 expression { currentBuild.rawBuild.getCause(hudson.model.Cause$UserIdCause) != null }
             }
             steps {
-                // Prompt for user confirmation before proceeding with the destruction
-                input message: 'Proceed with destruction? ("Proceed" to continue or "Abort" to cancel)', ok: 'Proceed'
-                // Destroy the infrastructure using terraform destroy
-                sh 'terraform destroy -auto-approve'
+                dir('automation/terraform') {
+                    // Change the working directory to 'automation/terraform'
+                    input message: 'Proceed with destruction? ("Proceed" to continue or "Abort" to cancel)', ok: 'Proceed'
+                    sh 'terraform destroy -auto-approve'
+                }
             }
         }
     }
 
     post {
         always {
-            // Clean up the workspace after each run
             cleanWs()
         }
 
         success {
-            // Display a success message when the pipeline completes successfully
             echo 'Pipeline completed successfully.'
         }
 
         failure {
-            // Display a failure message when the pipeline fails
             echo 'Pipeline failed.'
         }
     }
