@@ -1,7 +1,5 @@
 **Report: DevSecOps Infrastructure Deployment**
 
-*Prepared for the Stakeholders of [Company Name]*
-
 **Executive Summary**
 
 This report provides an overview of the successful deployment of a DevSecOps infrastructure for Zurich Insurance. The project aimed to enable the team responsible for assessing damage to vehicles, to upload images through a user-friendly web interface and securely store them in a highly available and scalable environment. The infrastructure was designed using AWS services, including S3, Lambda, and API Gateway, with automation achieved through Terraform. This report outlines the architectural design, key decision-making process, and the achieved results.
