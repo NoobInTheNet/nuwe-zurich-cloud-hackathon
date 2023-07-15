@@ -1,24 +1,24 @@
-# Terraform Project for Scalable Infrastructure
+# 🚀 NUWE Zurich Cloud Hackathon: Terraform Project for Block 1
 
-This repository contains Terraform code for creating a scalable infrastructure on AWS. The infrastructure includes two EC2 instances, each with its own key pair, running in the same VPC and subnet.
+Welcome to the Terraform project for Block 1 of NUWE's Zurich Cloud Hackathon! This repository is your one-stop-shop for creating a two-node EC2 infrastructure on AWS. Each node is unique, boasting its own key pair, and they coexist harmoniously within the same VPC and subnet.
 
-## Project Structure
+## 📚 Project Structure
 
-The project is structured as follows:
+Our project is neatly organized as follows:
 
-- `main.tf`: This is the main entry point for the Terraform project. It calls the local modules to create the resources.
-- `backend.tf`: This file configures the backend for storing the Terraform state. We're using an S3 bucket for this purpose.
-- `outputs.tf`: This file defines the outputs for the Terraform project. These outputs provide useful information about the resources that are created.
-- `providers.tf`: This file configures the AWS provider for Terraform.
-- `variables.tf`: This file defines the variables for the Terraform project. These variables allow you to customize the resources that are created.
-- `versions.tf`: This file specifies the required versions of Terraform and the AWS provider.
-- `modules/`: This directory contains the local modules for the different resources. Each module includes its own `main.tf`, `variables.tf`, and `outputs.tf` file.
+- `main.tf`: The main entry point for our Terraform project. It's like the conductor of an orchestra, calling upon local modules to create the resources.
+- `backend.tf`: This file is our backstage manager, configuring the backend for storing the Terraform state. We're using an S3 bucket for this purpose.
+- `outputs.tf`: This file is our show-and-tell, defining the outputs for the Terraform project. These outputs provide useful information about the resources that are created.
+- `providers.tf`: This file is our AWS provider configurator for Terraform.
+- `variables.tf`: This file is our customization hub, defining the variables for the Terraform project. These variables allow you to customize the resources that are created.
+- `versions.tf`: This file is our quality control, specifying the required versions of Terraform and the AWS provider.
+- `modules/`: This directory is our resource factory, containing the local modules for the different resources. Each module includes its own `main.tf`, `variables.tf`, and `outputs.tf` file.
 
-## Decisions and Rationale
+## 🧠 Decisions and Rationale
 
 ### Individual EC2 Instances vs Auto Scaling Group
 
-We initially considered using an Auto Scaling Group (ASG) for the EC2 instances. An ASG would provide automatic scaling based on load, and it would ensure that the desired number of instances are always running.
+We initially toyed with the idea of using an Auto Scaling Group (ASG) for the EC2 instances. An ASG would provide automatic scaling based on load, and it would ensure that the desired number of instances are always running.
 
 However, the requirement was to use a different key pair for each instance. In an ASG, all instances typically share the same key pair because they're created from the same launch configuration. Therefore, we decided to use individual EC2 instances instead of an ASG to comply with this requirement.
 
@@ -34,7 +34,7 @@ The AMI ID is specified as a variable, so you can easily change it if you want t
 
 The security group allows SSH access and opens the specific ports that the services will use. We restricted the source IP addresses for the SSH ingress rules to reduce the exposure to potential attacks. The CIDR blocks for SSH access are specified as a variable, so you can easily change them.
 
-## Authentication
+## 🔐 Authentication
 
 We recommend using AWS Identity and Access Management (IAM) roles for authenticating Terraform with AWS. If you're running Terraform on an EC2 instance, you can attach an IAM role to the instance with the necessary permissions. If you're running Terraform locally, you can use the `assume_role` block in the AWS provider configuration.
 
@@ -64,9 +64,9 @@ export AWS_SECRET_ACCESS_KEY=your_secret_key
 export AWS_SESSION_TOKEN=your_session_token  # Optional
 ```
 
-*Remember to replace placeholders like `ACCOUNT_ID`, `ROLE_NAME`, `ACCESS_KEY_ID_FROM_ABOVE`, `SECRET_ACCESS_KEY_FROM_ABOVE`, `SESSION_TOKEN_FROM_ABOVE`, `your_access_key`, `your_secret_key`, and `your_session_token` with your actual values.
+\*Remember to replace placeholders like `ACCOUNT_ID`, `ROLE_NAME`, `ACCESS_KEY_ID_FROM_ABOVE`, `SECRET_ACCESS_KEY_FROM_ABOVE`, `SESSION_TOKEN_FROM_ABOVE`, `your_access_key`, `your_secret_key`, and `your_session_token` with your actual values.
 
-## Usage
+## 🏃‍♂️ Usage
 
 To use this Terraform project, you need to have Terraform and the AWS CLI installed. You also need to have an AWS account and the necessary permissions to create the resources.
 
@@ -94,3 +94,17 @@ terraform plan -out=tfplan
 ```bash
 terraform apply tfplan
 ```
+
+## 🐳 Docker Deployment with Nuwe
+
+We've also included a customized version of the Docker setup provided by Nuwe for deployment. Here's how to use it:
+
+1. Build and deploy the Docker Compose definition:
+
+```bash
+docker compose up --build -d
+```
+
+- Please note that we've removed the LocalStack deployment as we're using AWS directly.
+- Also, we detected that Gogs UI wasn't working because of port 10080, which was being the one mapped externally for the web UI access, and is usually blocked by browsers to avoid [NAT Slipstreaming](https://www.vandis.com/insights/nat-slipstream-what-it-is-and-how-to-protect-your-organization/) attacks.
+- And the first login on Gogs, we created the admin user through the CLI tool.

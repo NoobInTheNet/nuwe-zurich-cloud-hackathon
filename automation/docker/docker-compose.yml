@@ -1,0 +1,49 @@
+version: '3.9'
+services:
+  github_local:
+    image: gogs/gogs
+    container_name: github_local
+    volumes:
+      #- /tmp/gogs/data:/data
+      - ./docker/gogs/data:/data
+    ports:
+      - "1022:22"
+      - "3000:3000"
+    networks:
+      dev_ops:
+        ipv4_address: 172.21.0.4
+    extra_hosts:
+      - "jenkins_master:172.21.0.3"
+      - "github_local:172.21.0.4"  
+  
+  jenkins_master:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: jenkins_master
+    depends_on:
+      - github_local
+    volumes:
+      #- /tmp/jenkins_home:/var/jenkins_home
+      - ./docker/jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - $HOME/.aws/:/var/jenkins_home/.aws
+    links:
+      - github_local
+    networks:
+      dev_ops:
+        ipv4_address: 172.21.0.3
+    ports:
+      - "8000:8080"
+      - "50000:50000"
+    extra_hosts:
+      - "jenkins_master:172.21.0.3"
+      - "github_local:172.21.0.4" 
+
+networks:
+  dev_ops:
+    ipam:
+      driver: default
+      config: 
+        - subnet: "172.21.0.0/24"
+          gateway: 172.21.0.1
