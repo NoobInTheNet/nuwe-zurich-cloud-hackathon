@@ -12,4 +12,9 @@ variable "stack_name" {
   type        = string
   default     = "nuwe-zurich-cloud-hackathon-2"
 }
+
+variable "deployment_environment" {
+  description = "The environment where the resources will be deployed to."
+  type        = string
+}
 #--------[Resources's Variables]--------#
