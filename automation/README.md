@@ -56,13 +56,7 @@ export AWS_SECRET_ACCESS_KEY=SECRET_ACCESS_KEY_FROM_ABOVE
 export AWS_SESSION_TOKEN=SESSION_TOKEN_FROM_ABOVE
 ```
 
-As a fallback, use environment variables to provide AWS credentials.
-
-```sh
-export AWS_ACCESS_KEY_ID=your_access_key
-export AWS_SECRET_ACCESS_KEY=your_secret_key
-export AWS_SESSION_TOKEN=your_session_token  # Optional
-```
+As a fallback, use environment variables to provide AWS manually generated credentials.
 
 \*Remember to replace placeholders like `ACCOUNT_ID`, `ROLE_NAME`, `ACCESS_KEY_ID_FROM_ABOVE`, `SECRET_ACCESS_KEY_FROM_ABOVE`, `SESSION_TOKEN_FROM_ABOVE`, `your_access_key`, `your_secret_key`, and `your_session_token` with your actual values.
 
@@ -97,7 +91,7 @@ terraform apply tfplan
 
 ## 🐳 Docker Deployment with Nuwe
 
-We've also included a customized version of the Docker setup provided by Nuwe for deployment. Here's how to use it:
+We've also made use of a customized version of the Docker setup provided by Nuwe for deployment. Here's how to use it:
 
 1. Build and deploy the Docker Compose definition:
 
@@ -108,3 +102,4 @@ docker compose up --build -d
 - Please note that we've removed the LocalStack deployment as we're using AWS directly.
 - Also, we detected that Gogs UI wasn't working because of port 10080, which was being the one mapped externally for the web UI access, and is usually blocked by browsers to avoid [NAT Slipstreaming](https://www.vandis.com/insights/nat-slipstream-what-it-is-and-how-to-protect-your-organization/) attacks.
 - And the first login on Gogs, we created the admin user through the CLI tool.
+- Also had to allowlist the connections between Gogs and Jenkins, due to that because of security reasons (SSRF protection), local connections weren't allowed for the webhooks.
