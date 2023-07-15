@@ -13,7 +13,7 @@ module "security_group" {
 
   # Module's variables; commented ones have a default value set.
   sg_name        = "${var.stack_name}-sg"
-  sg_description = "Security group for the instances of the 1st block of Nuwe's Zurich Cloud Hackathon."
+  sg_description = "Nuwe Zurich Cloud Hackathon instance SG"
   vpc_id         = module.vpc.id
 }
 
